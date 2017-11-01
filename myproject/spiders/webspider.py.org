@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+import scrapy
+
+
+class WebspiderSpider(scrapy.Spider):
+    name = 'webspider'
+    allowed_domains = ['www.wai-gaya.site']
+    start_urls = ['http://www.wai-gaya.site/']
+
+    def parse(self, response):
+        pass

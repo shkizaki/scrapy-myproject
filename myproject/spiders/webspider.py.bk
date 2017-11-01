@@ -1,0 +1,52 @@
+# -*- coding: utf-8 -*-
+import scrapy
+from myproject.items import MyprojectItem
+import re
+import datetime
+from scrapy.spider import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+class WebspiderSpider(scrapy.Spider):
+    name = 'webspider'
+    allowed_domains = ['www.wai-gaya.site']
+    start_urls = ['https://www.wai-gaya.site/']
+    
+    xpath = {
+        'title' : "//title/text()",
+    }
+#    
+#    list_allow = [r'(正規表現)'] #この条件に合うリンクは巡回
+    list_deny = [
+#                r'/www.wai-gaya.site/wordpress/', # こちらは巡回しないリンクの指定例。リスト表記も可能
+#            ]
+#
+#    list_allow_parse = [r'(正規表現)']  #データ抽出するリンク指定
+#    list_deny_parse = [                #データ抽出しないリンク指定
+#                r'(正規表現)',
+#                r'(正規表現)',
+#                ]
+
+#    rules = (
+#        # 巡回ルール
+#        Rule(LinkExtractor(
+#            allow=list_allow_parse,
+#            deny=list_deny_parse,
+#            unique=True # おなじリンク先ではデータ抽出しない
+#            ),
+#            callback='parse_items' # 条件に合えば、ここで指定したデータ抽出実行関数を実行する
+#        ),
+#    )
+     
+     rules = (
+         Rule(LinkExtractor(allow=('index\.php', ), deny=('wordpress/', ))),
+         Rule(LinkExtractor(unique=True,callback='parse_items')),
+     )
+
+    # データ抽出関数定義
+    def parse(self, response): # response に、ウェブサイトの情報が入っている
+        item = MyprojectItem() # items.pyで指定したクラス
+        item['title'] = response.xpath(self.xpath['title']).extract()[0]
+        item['link'] = response.url
+        item['date'] = datetime.datetime.utcnow() + datetime.timedelta(hours=9) # 現在時間。日本時間にして突っ込む。
+
+        yield item
